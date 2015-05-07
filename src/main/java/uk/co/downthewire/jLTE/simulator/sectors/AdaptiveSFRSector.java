@@ -106,7 +106,8 @@ public class AdaptiveSFRSector extends SFRSector {
 				ue.setEdge(false);
 			}
 		}
-		LOG.info("Number of edge UEs = {}", edgeCount);
+		LOG.info("Number of servedUEs = {}, Number of edge UEs = {}, Number of non-edge UEs = {}",
+				servedUEs.size(), edgeCount, servedUEs.size() - edgeCount);
 	}
 
 	@Override

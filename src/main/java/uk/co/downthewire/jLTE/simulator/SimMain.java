@@ -32,7 +32,7 @@ public class SimMain {
     private final FadingData fadingData;
     private final X2Router x2Router;
     private final int FRAME_LENGTH = 10;
-
+    private final int FRAME_CONFIG = 9;
     public SimMain(Configuration config, List<UE> ues, List<AbstractSector> sectors, FadingData fadingData, X2Router x2Router) {
         this.config = config;
         this.sectors = sectors;
@@ -61,7 +61,7 @@ public class SimMain {
         // Frame is configured before simulation
         // then reconfigure at the beginning of each frame or when necessary depends on the algorithms
         for (AbstractSector sector : sectors) {
-            sector.setFrameConfiguration(6);
+            sector.setFrameConfiguration(FRAME_CONFIG);
         }
 
         // For each time increment (1ms) work out who to schedule.
@@ -111,12 +111,12 @@ public class SimMain {
             stats(iteration, ues, sectors, config);
             logUEs(iteration, ues);
 
-            if (subframe >= FRAME_LENGTH) {
-                subframe = 0;
+            if (subframe >= FRAME_LENGTH - 1) {
+                subframe = -1;
 
                 // reconfigure frame after each 10ms.
                 for (AbstractSector sector : sectors) {
-                    sector.setFrameConfiguration(6);
+                    sector.setFrameConfiguration(FRAME_CONFIG);
                 }
             }
         }
@@ -155,7 +155,9 @@ public class SimMain {
         return mutatingSectors;
     }
 
-    private static List<DistributedSFRSector> doDistributedAlgorithm(Configuration config, int iteration, List<AbstractSector> sectors, List<DistributedSFRSector> currentlyMutatingSectors) {
+    private static List<DistributedSFRSector> doDistributedAlgorithm(Configuration config, int iteration,
+                                   List<AbstractSector> sectors, List<DistributedSFRSector> currentlyMutatingSectors)
+    {
 
         if (iteration == 0 || iteration % config.getInt(FieldNames.DISTRIBUTED_SFR_WINDOW) != 0) {
             return currentlyMutatingSectors;

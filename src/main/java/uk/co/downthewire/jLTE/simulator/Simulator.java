@@ -125,6 +125,7 @@ public class Simulator extends AbstractConfiguredRunnable<SimulationResults> {
 		SimulationResults results = new SimulationResults(main.finalStats(ues));
 
 		LOG.debug("Time taken: {}", Double.toString((System.currentTimeMillis() - time) / 1000.0));
+		System.out.println("Simulation result:" + results);
 		return results;
 	}
 

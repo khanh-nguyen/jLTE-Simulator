@@ -112,7 +112,7 @@ public class UE {
     public void generateTraffic(double random) {
         int numRbs = trafficGenerator.generateTraffic(trafficType, random);
         // decide if demand traffic is UL or DL
-        if (random > config.getDouble(FieldNames.TRAFFIC_UPLINK_PROB)) {
+        if (random <= config.getDouble(FieldNames.TRAFFIC_UPLINK_PROB)) {
             // accumulate UL queue
             ulRBsQueued.accumulate(numRbs);
         }
