@@ -49,11 +49,15 @@ public class UE {
 
     private final List<ResourceBlock> scheduledRBs;
 
-    private int currentRBsQueued;
+    // private int currentRBsQueued;
+    private int currentULRBsQueued;
+    private int currentDLRBsQueued;
 
     private final SimpleCounter totalDatarates;
     private final SimpleCounter totalSinr;
-    private final SimpleCounter totalRBsServed;
+    // private final SimpleCounter totalRBsServed;
+    private final SimpleCounter ulRBServed;
+    private final SimpleCounter dlRBServed;
     //private final SimpleCounter totalRBsQueued;
     private final SimpleCounter ulRBsQueued;
     private final SimpleCounter dlRBsQueued;
@@ -78,7 +82,9 @@ public class UE {
 
         this.sectorTuples = new ArrayList<>();
 
-        this.totalRBsServed = new SimpleCounter();
+        //this.totalRBsServed = new SimpleCounter();
+        this.ulRBServed = new SimpleCounter();
+        this.dlRBServed = new SimpleCounter();
         //this.totalRBsQueued = new SimpleCounter();
         this.ulRBsQueued = new SimpleCounter();
         this.dlRBsQueued = new SimpleCounter();
@@ -115,24 +121,30 @@ public class UE {
         if (random <= config.getDouble(FieldNames.TRAFFIC_UPLINK_PROB)) {
             // accumulate UL queue
             ulRBsQueued.accumulate(numRbs);
+            currentULRBsQueued += numRbs;
         }
         else {
             // accumulate DL queue
             dlRBsQueued.accumulate(numRbs);
+            currentDLRBsQueued += numRbs;
         }
-        currentRBsQueued += numRbs;
+        //currentRBsQueued += numRbs;
     }
 
     public void schedule(ResourceBlock RB, boolean isDL) {
-        scheduledRBs.add(RB);
+        scheduledRBs.add(RB);   // TODO: should we distinguish ul scheduledRBs from dl ?
         if (isDL) {
-            dlRBsQueued.accumulate(-1.0);
+            // dlRBsQueued.accumulate(-1.0);
+            currentDLRBsQueued--;
+            dlRBsQueued.accumulate(1.0);
         }
         else {
-            ulRBsQueued.accumulate(-1.0);
+            // ulRBsQueued.accumulate(-1.0);
+            currentULRBsQueued--;
+            ulRBsQueued.accumulate(1.0);
         }
-        currentRBsQueued -= 1;
-        totalRBsServed.accumulate(1.0);
+//        currentRBsQueued -= 1;
+//        totalRBsServed.accumulate(1.0);
     }
 
     @SuppressWarnings("boxing")
@@ -243,6 +255,7 @@ public class UE {
         return currentRBsQueued;
     }
 
+    // TODO: should we distinguish UL served from DL served?
     public int getTotalNumDlRBsServed() {
         return (int) totalRBsServed.getCount();
     }
