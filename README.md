@@ -1,5 +1,7 @@
 # jLTE Simulator
 
+[![Join the chat at https://gitter.im/khanh-nguyen/jLTE-Simulator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/khanh-nguyen/jLTE-Simulator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## Overview 
 
 The jLTE Simulator is a network simulator designed to simulate the
