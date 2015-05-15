@@ -14,6 +14,7 @@ public final class FieldNames {
     public final static String UE_CONFIG = "scenario.path.ues";
     public final static String ENODEB_CONFIG = "scenario.path.enodebs";
     public final static String RESULTS_PATH = "scenario.path.results";
+    public final static String UE_TX_POWER = "ue.transmission.power";
 
     public final static String EXPERIMENT_ID = "experiment.id";
     public final static String CHROMOSOME_ID = "chromosome.id";

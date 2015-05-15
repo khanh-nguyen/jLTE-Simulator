@@ -55,7 +55,8 @@ public class SerFRSector extends SFRSector {
 
 	@Override
 	protected double calculatePriority(UE ue, ResourceBlock rb) {
-		double basePriority = ue.getRelativeSignalOnRB(rb.id);
+		//double basePriority = ue.getRelativeSignalOnRB(rb.id);
+		double basePriority = ue.getRelativeSignalOnRB(rb.id, true) + ue.getRelativeSignalOnRB(rb.id, true);
 		return basePriority * getGamma(ue, rb, config);
 	}
 

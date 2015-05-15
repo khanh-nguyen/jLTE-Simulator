@@ -21,17 +21,36 @@ public class SimulationResultsAggregator {
 
     @SuppressWarnings("boxing")
     public AggregatedSimulationResults getResult() {
-        List<Double> averageTputs = new ArrayList<>();
-        List<Double> percentileTputs = new ArrayList<>();
-        List<Double> maxTputs = new ArrayList<>();
+//        List<Double> averageTputs = new ArrayList<>();
+//        List<Double> percentileTputs = new ArrayList<>();
+//        List<Double> maxTputs = new ArrayList<>();
+        List<Double> averageULTputs = new ArrayList<>();
+        List<Double> averageDLTputs = new ArrayList<>();
+        List<Double> percentileULTputs = new ArrayList<>();
+        List<Double> percentileDLTputs = new ArrayList<>();
+        List<Double> maxULTputs = new ArrayList<>();
+        List<Double> maxDLTputs = new ArrayList<>();
 
         for (SimulationResults result : results) {
-            averageTputs.add(result.avergeTput);
-            percentileTputs.add(result.percentileTput);
-            maxTputs.add(result.maxUETput);
+//            averageTputs.add(result.avergeTput);
+//            percentileTputs.add(result.percentileTput);
+//            maxTputs.add(result.maxUETput);
+            averageULTputs.add(result.avergeULTput);
+            averageDLTputs.add(result.avergeDLTput);
+            percentileULTputs.add(result.percentileULTput);
+            percentileDLTputs.add(result.percentileDLTput);
+            maxULTputs.add(result.maxUEULTput);
+            maxDLTputs.add(result.maxUEDLTput);
         }
 
-        return new AggregatedSimulationResults(mean(percentileTputs), mean(averageTputs), mean(maxTputs), results.get(0).configuration, stddev(percentileTputs), stddev(averageTputs));
+        //return new AggregatedSimulationResults(mean(percentileTputs), mean(averageTputs), mean(maxTputs), results.get(0).configuration, stddev(percentileTputs), stddev(averageTputs));
+        return new AggregatedSimulationResults(mean(percentileULTputs), mean(percentileDLTputs),
+                mean(averageULTputs), mean(averageDLTputs),
+                mean(maxULTputs), mean(maxDLTputs),
+                results.get(0).configuration,
+                stddev(percentileULTputs), stddev(percentileDLTputs),
+                stddev(averageULTputs), stddev(averageDLTputs)
+        );
     }
 
     private static double mean(List<Double> inputs) {

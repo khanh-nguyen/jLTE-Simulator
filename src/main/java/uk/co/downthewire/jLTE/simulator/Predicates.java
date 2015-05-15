@@ -36,60 +36,109 @@ public class Predicates {
         }
     };
 
-    public static final F<UE, Double> GET_AVERAGE_UE_TPUT = new F<UE, Double>() {
+    public static final F<UE, Double> GET_AVERAGE_UE_UL_TPUT = new F<UE, Double>() {
         @SuppressWarnings("boxing")
         @Override
         public Double f(UE ue) {
-            return ue.calculateAverageDatarate();
+            //return ue.calculateAverageDatarate();
+            return ue.calculateAverageULDatarate();
         }
     };
 
-    public static final F<UE, Double> GET_AVERAGE_UE_SINR = new F<UE, Double>() {
+    public static final F<UE, Double> GET_AVERAGE_UE_DL_TPUT = new F<UE, Double>() {
         @SuppressWarnings("boxing")
         @Override
         public Double f(UE ue) {
-            return ue.calculateAverageSinr();
+            //return ue.calculateAverageDatarate();
+            return ue.calculateAverageDLDatarate();
+        }
+    };
+
+    public static final F<UE, Double> GET_AVERAGE_UE_UL_SINR = new F<UE, Double>() {
+        @SuppressWarnings("boxing")
+        @Override
+        public Double f(UE ue) {
+            return ue.calculateAverageULSinr();
+        }
+    };
+
+    public static final F<UE, Double> GET_AVERAGE_UE_DL_SINR = new F<UE, Double>() {
+        @SuppressWarnings("boxing")
+        @Override
+        public Double f(UE ue) {
+            return ue.calculateAverageDLSinr();
         }
     };
 
     public static final Predicate<UE> HAS_NEVER_BEEN_SCHEDULED = new Predicate<UE>() {
         @Override
         public boolean apply(UE ue) {
-            return ue.getTotalNumDlRBsServed() < 1;
+            //return ue.getTotalNumDlRBsServed() < 1;
+            return ue.getTotalNumDLRBsServed() + ue.getTotalNumULRBsServed() < 1;
         }
     };
 
     public static final Predicate<UE> HAS_NEVER_BEEN_SCHEDULED_AND_HAD_DATA = new Predicate<UE>() {
         @Override
         public boolean apply(UE ue) {
-            return ue.getTotalNumDlRBsServed() < 1 && ue.getCurrentRBsQueued() > 0;
+            //return ue.getTotalNumDlRBsServed() < 1 && ue.getCurrentRBsQueued() > 0;
+            return ue.getTotalNumDLRBsServed() + ue.getTotalNumULRBsServed() < 1 &&
+                    ue.getCurrentRBsQueued(true) + ue.getCurrentRBsQueued(false) > 0;
         }
     };
 
-    public static final F<UE, Double> UE_NUM_RBS_SERVED = new F<UE, Double>() {
+    public static final F<UE, Double> UE_NUM_UL_RBS_SERVED = new F<UE, Double>() {
         @SuppressWarnings("boxing")
         @Override
         public Double f(UE ue) {
-            return (double) ue.getTotalNumDlRBsServed();
+            //return (double) ue.getTotalNumDlRBsServed();
+            return (double) ue.getTotalNumULRBsServed();
         }
     };
 
-    public static final F<UE, Double> UE_NUM_RBS_QUEUED = new F<UE, Double>() {
+    public static final F<UE, Double> UE_NUM_DL_RBS_SERVED = new F<UE, Double>() {
         @SuppressWarnings("boxing")
         @Override
         public Double f(UE ue) {
-            return (double) ue.getTotalNumDlRBsQueued();
+            //return (double) ue.getTotalNumDlRBsServed();
+            return (double) ue.getTotalNumDLRBsServed();
+        }
+    };
+
+    public static final F<UE, Double> UE_NUM_UL_RBS_QUEUED = new F<UE, Double>() {
+        @SuppressWarnings("boxing")
+        @Override
+        public Double f(UE ue) {
+            //return (double) ue.getTotalNumDlRBsQueued();
+            return (double) ue.getTotalNumULRBsQueued();
+        }
+    };
+
+    public static final F<UE, Double> UE_NUM_DL_RBS_QUEUED = new F<UE, Double>() {
+        @SuppressWarnings("boxing")
+        @Override
+        public Double f(UE ue) {
+            //return (double) ue.getTotalNumDlRBsQueued();
+            return (double) ue.getTotalNumDLRBsQueued();
         }
     };
 
     /**
      * Sector based predicates
      */
-    public static final F<AbstractSector, Double> SECTOR_TPUT = new F<AbstractSector, Double>() {
+    public static final F<AbstractSector, Double> SECTOR_DL_TPUT = new F<AbstractSector, Double>() {
         @SuppressWarnings("boxing")
         @Override
         public Double f(AbstractSector sector) {
             return sector.getAvgDownlinkTput();
+        }
+    };
+
+    public static final F<AbstractSector, Double> SECTOR_UL_TPUT = new F<AbstractSector, Double>() {
+        @SuppressWarnings("boxing")
+        @Override
+        public Double f(AbstractSector sector) {
+            return sector.getAvgUplinkTput();
         }
     };
 

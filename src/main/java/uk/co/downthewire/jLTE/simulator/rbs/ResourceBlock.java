@@ -9,15 +9,23 @@ public class ResourceBlock {
     public final int id;
     private boolean isFullPower;
     private boolean isScheduled;
-    private final SimpleCounter datarate;
-    private final SimpleCounter sinr;
+//    private final SimpleCounter datarate;
+    private final SimpleCounter ulDatarate;
+    private final SimpleCounter dlDatarate;
+//    private final SimpleCounter sinr;
+    private final SimpleCounter ulSinr;
+    private final SimpleCounter dlSinr;
 
     public ResourceBlock(int id) {
         this.id = id;
         this.isFullPower = true;
         this.isScheduled = false;
-        this.datarate = new SimpleCounter();
-        this.sinr = new SimpleCounter();
+//        this.datarate = new SimpleCounter();
+//        this.sinr = new SimpleCounter();
+        this.ulDatarate = new SimpleCounter();
+        this.dlDatarate = new SimpleCounter();
+        this.ulSinr = new SimpleCounter();
+        this.dlSinr = new SimpleCounter();
     }
 
     public void resetScheduledStatus() {
@@ -70,24 +78,42 @@ public class ResourceBlock {
     }
 
     @SuppressWarnings("hiding")
-    public void accumulateDataRate(double datarate) {
-        this.datarate.accumulate(datarate);
+//    public void accumulateDataRate(double datarate) {
+//        this.datarate.accumulate(datarate);
+//    }
+    public void accumulateULDataRate(double datarate) {
+        this.ulDatarate.accumulate(datarate);
     }
+
+    public void accumulateDLDataRate(double datarate) {
+        this.dlDatarate.accumulate(datarate);
+    }
+
 
     @SuppressWarnings("hiding")
-    public void accumulateSinr(double sinr) {
-        this.sinr.accumulate(sinr);
+    public void accumulateULSinr(double sinr) {
+        this.ulSinr.accumulate(sinr);
     }
 
-    public double getAverageSinr() {
-        return sinr.getAverage();
+    public void accumulateDLSinr(double sinr) {
+        this.dlSinr.accumulate(sinr);
+    }
+
+    public double getAverageULSinr() {
+        return ulSinr.getAverage();
+    }
+
+    public double getAverageDLSinr() {
+        return dlSinr.getAverage();
     }
 
     public static final Comparator<ResourceBlock> RB_SINR_COMPARATOR = new Comparator<ResourceBlock>() {
         @Override
         public int compare(final ResourceBlock rb1, final ResourceBlock rb2) {
-            double avgSinr1 = rb1.getAverageSinr();
-            double avgSinr2 = rb2.getAverageSinr();
+//            double avgSinr1 = rb1.getAverageSinr();
+//            double avgSinr2 = rb2.getAverageSinr();
+            double avgSinr1 = rb1.getAverageULSinr() + rb1.getAverageDLSinr();
+            double avgSinr2 = rb2.getAverageULSinr() + rb2.getAverageDLSinr();
 
             return Double.valueOf(avgSinr1).compareTo(avgSinr2);
         }

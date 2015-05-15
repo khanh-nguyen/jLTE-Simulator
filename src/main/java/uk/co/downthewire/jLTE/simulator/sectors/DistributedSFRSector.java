@@ -41,7 +41,8 @@ public class DistributedSFRSector extends AdaptiveSFRSector {
 
 	@SuppressWarnings({ "unused", "boxing" })
 	public void mutate(int iteration) {
-		priorDatarate = getPercentileTput();
+		//priorDatarate = getPercentileTput();
+		priorDatarate = getPercentileULTput() + getPercentileDLTput();
 
 		for (DistributedSFRSector sector: getNeighbouringSectors()) {
 			sector.notifyNeighbour();
@@ -56,7 +57,8 @@ public class DistributedSFRSector extends AdaptiveSFRSector {
 
 	public void notifyNeighbour() {
 		neighbourMutating = true;
-		priorDatarate = getPercentileTput();
+		//priorDatarate = getPercentileTput();
+		priorDatarate = getPercentileULTput() + getPercentileDLTput();
 	}
 
 	public List<DistributedSFRSector> getNeighbouringSectors() {
@@ -107,7 +109,8 @@ public class DistributedSFRSector extends AdaptiveSFRSector {
 
 	@SuppressWarnings("boxing")
 	public boolean hasTputIncreasedDuringMutationWindow() {
-		double percentileTput = getPercentileTput();
+		//double percentileTput = getPercentileTput();
+		double percentileTput = getPercentileULTput() + getPercentileDLTput();
 		LOG.error("sector[{}]: priorPercentileTput = {}, postPercentileTput = {}", id, priorDatarate, percentileTput);
 		return priorDatarate < percentileTput;
 	}

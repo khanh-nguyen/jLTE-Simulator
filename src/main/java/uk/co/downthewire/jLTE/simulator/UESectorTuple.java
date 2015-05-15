@@ -91,7 +91,9 @@ public class UESectorTuple implements Comparable<UESectorTuple> {
     private final Configuration config;
     private final FadingData fadingData;
     private final double txPowerPerRB;
+    private final double txPowerPerRBUL;
     private final double downlinkGain;
+    private final double uplinkGain;
 
     /**
      * Create a tuple with the provided sector and UE.
@@ -104,7 +106,9 @@ public class UESectorTuple implements Comparable<UESectorTuple> {
         this.sector = sector;
         this.fadingData = fadingData;
         this.downlinkGain = calculateDownlinkGain(sector, ue);
+        this.uplinkGain = this.downlinkGain;      // FIXME: for simplicity assume UL and DL gains are similar
         this.txPowerPerRB = (sector.txPower / config.getInt(FieldNames.RBS_PER_SECTOR)) * downlinkGain;
+        this.txPowerPerRBUL = ue.txPower * uplinkGain;
         LOG.trace("UE[{}] at {}, Sector[{}:{}] at {}, txPowerPerRB={}", ue.id, ue.location, sector.servingENodeBId, sector.id, sector.location, txPowerPerRB);
     }
 
@@ -147,8 +151,31 @@ public class UESectorTuple implements Comparable<UESectorTuple> {
         return resultPower;
     }
 
+    public double getUplinkPower(ResourceBlock RB) {
+        if (!config.getBoolean(FieldNames.FADING)) {
+            LOG.trace("txPowerPerRB = {}", txPowerPerRB);
+            return txPowerPerRBUL;
+        }
+        float[] fading = fadingData.getFadingDataForTuple(id);
+        double fadingFactor = Math.pow(10, 0.1 * fading[RB.id]);
+        double resultPower = txPowerPerRBUL * fadingFactor;
+        LOG.trace("txPowerPerRB = {}, fading = {}, result = {}", txPowerPerRBUL, fadingFactor, resultPower);
+        return resultPower;
+    }
+
+    public double getPower(ResourceBlock RB, int subframe) {
+        boolean isDL = this.sector.isDownlinkSubframe(subframe);
+        if (isDL) {
+            return this.getDownlinkPower(RB);
+        } else {
+            return this.getUplinkPower(RB);
+        }
+    }
+
     @Override
     public String toString() {
-        return "Tuple[" + ue.id + ", " + sector.servingENodeBId + ":" + sector.id + "]\t" + "downlinkGain=" + downlinkGain + "\ttxPowerPerRB=" + txPowerPerRB;
+        return "Tuple[" + ue.id + ", " + sector.servingENodeBId + ":" + sector.id + "]\t" +
+                "downlinkGain=" + downlinkGain + "\ttxPowerPerRB=" + txPowerPerRB +
+                "uplinkGain=" + uplinkGain + "\ttxPowerPerRBUL=" + txPowerPerRBUL;
     }
 }

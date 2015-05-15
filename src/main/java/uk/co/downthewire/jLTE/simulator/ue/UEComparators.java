@@ -28,7 +28,10 @@ public final class UEComparators {
         return new Comparator<UE>() {
             @Override
             public int compare(final UE u1, final UE u2) {
-                return Double.valueOf(u1.getSignalOnRB(RB)).compareTo(u2.getSignalOnRB(RB));
+                //return Double.valueOf(u1.getSignalOnRB(RB)).compareTo(u2.getSignalOnRB(RB));
+                final Double s1 = u1.getSignalOnRB(RB, true) + u1.getSignalOnRB(RB, false);
+                final Double s2 = u2.getSignalOnRB(RB, true) + u2.getSignalOnRB(RB, false);
+                return s1.compareTo(s2);
             }
         };
     }
@@ -37,7 +40,10 @@ public final class UEComparators {
         return new Comparator<UE>() {
             @Override
             public int compare(final UE u1, final UE u2) {
-                return Double.valueOf(u1.getRelativeSignalOnRB(RB)).compareTo(u2.getRelativeSignalOnRB(RB));
+                //return Double.valueOf(u1.getRelativeSignalOnRB(RB)).compareTo(u2.getRelativeSignalOnRB(RB));
+                final Double s1 = u1.getRelativeSignalOnRB(RB, true) + u1.getRelativeSignalOnRB(RB, false);
+                final Double s2 = u2.getRelativeSignalOnRB(RB, true) + u2.getRelativeSignalOnRB(RB, false);
+                return s1.compareTo(s2);
             }
         };
     }
@@ -46,8 +52,10 @@ public final class UEComparators {
         @SuppressWarnings("boxing")
         @Override
         public int compare(final UE u1, final UE u2) {
-            final Double r1 = u1.calculateAverageSinr();
-            final Double r2 = u2.calculateAverageSinr();
+//            final Double r1 = u1.calculateAverageSinr();
+//            final Double r2 = u2.calculateAverageSinr();
+            final Double r1 = u1.calculateAverageULSinr() + u1.calculateAverageDLSinr();
+            final Double r2 = u2.calculateAverageULSinr() + u2.calculateAverageDLSinr();
             return r1.compareTo(r2);
         }
     };

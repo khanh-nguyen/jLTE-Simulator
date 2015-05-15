@@ -99,7 +99,8 @@ public class AdaptiveSFRSector extends SFRSector {
 		int edgeCount = 0;
 		double edgeThreshold = getEdgeThreshold();
 		for (UE ue: servedUEs) {
-			if (ue.getAverageSinr() <= edgeThreshold) {
+			//if (ue.getAverageSinr() <= edgeThreshold) {
+			if (ue.getAverageSinr(true) + ue.getAverageSinr(false) <= edgeThreshold) {
 				ue.setEdge(true);
 				edgeCount += 1;
 			} else {

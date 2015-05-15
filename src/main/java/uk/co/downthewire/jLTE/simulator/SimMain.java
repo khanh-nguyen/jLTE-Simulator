@@ -32,7 +32,7 @@ public class SimMain {
     private final FadingData fadingData;
     private final X2Router x2Router;
     private final int FRAME_LENGTH = 10;
-    private final int FRAME_CONFIG = 9;
+    private final int FRAME_CONFIG = 7;
     public SimMain(Configuration config, List<UE> ues, List<AbstractSector> sectors, FadingData fadingData, X2Router x2Router) {
         this.config = config;
         this.sectors = sectors;
@@ -93,7 +93,8 @@ public class SimMain {
             }
 
             for (final UE ue : ues) {
-                ue.accumulateDatarate();
+                // NOTE: subframe is needed in ue.calculateInterference() to know if the RB is scheduled for UL or DL
+                ue.accumulateDatarate(subframe);
             }
 
             for (final AbstractSector sector : sectors) {

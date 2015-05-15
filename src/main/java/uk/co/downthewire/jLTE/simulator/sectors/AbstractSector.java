@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static uk.co.downthewire.jLTE.simulator.Predicates.GET_AVERAGE_UE_TPUT;
+import static uk.co.downthewire.jLTE.simulator.Predicates.GET_AVERAGE_UE_UL_TPUT;
+import static uk.co.downthewire.jLTE.simulator.Predicates.GET_AVERAGE_UE_DL_TPUT;
 import static uk.co.downthewire.jLTE.simulator.Predicates.UE_ALWAYS_TRUE;
 
 public abstract class AbstractSector {
@@ -41,7 +42,9 @@ public abstract class AbstractSector {
 
     private final SimpleCounter numRBsScheduledCounter;
     private final SimpleCounter numRBsNotScheduledCounter;
-    private final SimpleCounter datarateCounter;
+    //private final SimpleCounter datarateCounter;
+    private final SimpleCounter ulDatarateCounter;
+    private final SimpleCounter dlDatarateCounter;
     private final SimpleCounter loadCounter;
     private int numDlSubframes;
 
@@ -66,7 +69,9 @@ public abstract class AbstractSector {
         this.servedUEs = new ArrayList<>();
 
         this.loadCounter = new SimpleCounter();
-        this.datarateCounter = new SimpleCounter();
+        //this.datarateCounter = new SimpleCounter();
+        this.ulDatarateCounter = new SimpleCounter();
+        this.dlDatarateCounter = new SimpleCounter();
         this.numRBsScheduledCounter = new SimpleCounter();
         this.numRBsNotScheduledCounter = new SimpleCounter();
 
@@ -131,28 +136,44 @@ public abstract class AbstractSector {
 
     protected static void allocateRBToUE(UE ue, ResourceBlock RB, boolean isDL) {
         ue.schedule(RB, isDL);
+        // TODO: we have to check if the RB is actually scheduled to the UE
         RB.schedule();
     }
 
     public void accumulateDatarate() {
-        double datarate = 0.0;
+        double ulDatarate = 0.0, dlDatarate = 0.0;
         for (UE ue : servedUEs) {
-            datarate += ue.getLastDatarate();
+            ulDatarate += ue.getLastULDatarate();
+            dlDatarate += ue.getLastDLDatarate();
         }
-        datarateCounter.accumulate(datarate);
+        ulDatarateCounter.accumulate(ulDatarate);
+        dlDatarateCounter.accumulate(dlDatarate);
     }
 
     public double getAvgDownlinkTput() {
-        return datarateCounter.getAverage();
+        return dlDatarateCounter.getAverage();
     }
 
-    public double getPercentileTput() {
+    public double getAvgUplinkTput() {
+        return ulDatarateCounter.getAverage();
+    }
 
-        Accumulator<UE> tputAll = new Accumulator<>(UE_ALWAYS_TRUE, GET_AVERAGE_UE_TPUT);
+    public double getPercentileULTput() {
+
+        Accumulator<UE> ulTputAll = new Accumulator<>(UE_ALWAYS_TRUE, GET_AVERAGE_UE_UL_TPUT);
         for (UE ue : servedUEs) {
-            tputAll.accumulate(ue);
+            ulTputAll.accumulate(ue);
         }
-        return tputAll.get5thPercentileAverage();
+        return ulTputAll.get5thPercentileAverage();
+    }
+
+    public double getPercentileDLTput() {
+
+        Accumulator<UE> dlTputAll = new Accumulator<>(UE_ALWAYS_TRUE, GET_AVERAGE_UE_DL_TPUT);
+        for (UE ue : servedUEs) {
+            dlTputAll.accumulate(ue);
+        }
+        return dlTputAll.get5thPercentileAverage();
     }
 
     public double calcAvgLoad() {

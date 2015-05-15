@@ -109,7 +109,8 @@ public class SFRSector extends AbstractSector {
 
     @SuppressWarnings("static-method")
     protected double calculatePriority(UE ue, ResourceBlock rb) {
-        double priority = ue.getRelativeSignalOnRB(rb.id);
+        // double priority = ue.getRelativeSignalOnRB(rb.id);
+        double priority = ue.getRelativeSignalOnRB(rb.id, true) + ue.getRelativeSignalOnRB(rb.id, false);
         if (!ue.isEdge() && rb.isFullPowerRB())
             priority = 0;
         if (ue.isEdge() && !rb.isFullPowerRB())
