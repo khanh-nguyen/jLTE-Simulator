@@ -18,10 +18,12 @@ public class SFRSector extends AbstractSector {
 
     public static SFRSector fromXML(Configuration config, Node xml, ENodeB eNodeB, Location location) {
         SectorParams params = new SectorParams(xml);
-        return new SFRSector(config, params.getSectorId(), eNodeB, location, params.getTxPower(), params.getAzimuth(), params.getHeight(), params.getDowntilt(), params.getAntennaGain());
+        return new SFRSector(config, params.getSectorId(), eNodeB, location, params.getTxPower(),
+                params.getAzimuth(), params.getHeight(), params.getDowntilt(), params.getAntennaGain());
     }
 
-    public SFRSector(Configuration config, int sectorId, final ENodeB eNodeB, final Location loc, double txPower, double azimuth, double height, double downtilt, double antennaGain) {
+    public SFRSector(Configuration config, int sectorId, final ENodeB eNodeB, final Location loc,
+                     double txPower, double azimuth, double height, double downtilt, double antennaGain) {
         super(config, sectorId, eNodeB, loc, txPower, azimuth, height, downtilt, antennaGain);
 
         int startFullPowerRBs = id * 33;
@@ -57,7 +59,7 @@ public class SFRSector extends AbstractSector {
      * Here we schedule the UE which has been scheduled least first until we've run out of UEs or RBs.
      */
     @Override
-    protected void doDownlinkAllocation(final int iteration, final int subframe) {
+    protected void allocateRB(final int iteration, final int subframe) {
         int scheduledRBs = 0;
         boolean isDL = isDownlinkSubframe(subframe);
         // get all edge UEs
@@ -74,7 +76,7 @@ public class SFRSector extends AbstractSector {
                 break;
             }
             // Sort by signal quality
-            Collections.sort(edgeUEs, getPriorityComparator(RB));
+            Collections.sort(edgeUEs, getPriorityComparator(RB, isDL));
             // Schedule the UE with the best signal
             final UE ue = edgeUEs.get(edgeUEs.size() - 1);
 
@@ -95,7 +97,7 @@ public class SFRSector extends AbstractSector {
                 break;
             }
             // Sort by signal quality
-            Collections.sort(toSchedule, getPriorityComparator(RB));
+            Collections.sort(toSchedule, getPriorityComparator(RB, isDL));
             // Schedule the UE with the best signal
             final UE ue = toSchedule.get(toSchedule.size() - 1);
 
@@ -108,9 +110,9 @@ public class SFRSector extends AbstractSector {
     }
 
     @SuppressWarnings("static-method")
-    protected double calculatePriority(UE ue, ResourceBlock rb) {
+    protected double calculatePriority(UE ue, ResourceBlock rb, boolean isDL) {
         // double priority = ue.getRelativeSignalOnRB(rb.id);
-        double priority = ue.getRelativeSignalOnRB(rb.id, true) + ue.getRelativeSignalOnRB(rb.id, false);
+        double priority = ue.getRelativeSignalOnRB(rb.id, isDL);
         if (!ue.isEdge() && rb.isFullPowerRB())
             priority = 0;
         if (ue.isEdge() && !rb.isFullPowerRB())
@@ -119,12 +121,12 @@ public class SFRSector extends AbstractSector {
         return priority;
     }
 
-    protected Comparator<UE> getPriorityComparator(final ResourceBlock RB) {
+    protected Comparator<UE> getPriorityComparator(final ResourceBlock RB, final boolean isDL) {
         return new Comparator<UE>() {
             @Override
             public int compare(final UE u1, final UE u2) {
-                double priority1 = calculatePriority(u1, RB);
-                double priority2 = calculatePriority(u2, RB);
+                double priority1 = calculatePriority(u1, RB, isDL);
+                double priority2 = calculatePriority(u2, RB, isDL);
                 return Double.valueOf(priority1).compareTo(priority2);
             }
         };

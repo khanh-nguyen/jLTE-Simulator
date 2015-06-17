@@ -18,10 +18,12 @@ public class AdaptiveSFRSector extends SFRSector {
 
 	public static AdaptiveSFRSector fromXML(Configuration config, Node xml, ENodeB eNodeB, Location location) {
 		SectorParams params = new SectorParams(xml);
-		return new AdaptiveSFRSector(config, params.getSectorId(), eNodeB, location, params.getTxPower(), params.getAzimuth(), params.getHeight(), params.getDowntilt(), params.getAntennaGain());
+		return new AdaptiveSFRSector(config, params.getSectorId(), eNodeB, location, params.getTxPower(),
+				params.getAzimuth(), params.getHeight(), params.getDowntilt(), params.getAntennaGain());
 	}
 
-	public AdaptiveSFRSector(Configuration config, int sectorId, final ENodeB eNodeB, final Location loc, double txPower, double azimuth, double height, double downtilt, double antennaGain) {
+	public AdaptiveSFRSector(Configuration config, int sectorId, final ENodeB eNodeB, final Location loc,
+							 double txPower, double azimuth, double height, double downtilt, double antennaGain) {
 		super(config, sectorId, eNodeB, loc, txPower, azimuth, height, downtilt, antennaGain);
 		setupRBs();
 	}
@@ -112,19 +114,19 @@ public class AdaptiveSFRSector extends SFRSector {
 	}
 
 	@Override
-	protected void doDownlinkAllocation(int iteration, int subframe) {
+	protected void allocateRB(int iteration, int subframe) {
 		PsRandom generalRandom = (PsRandom) config.getProperty(FieldNames.RANDOM_GENERAL);
 		double randomTrigger = getRandomTrigger();
 		if (generalRandom.nextDouble() < randomTrigger) {
 			LOG.info("Scheduling UEs randomly");
-			randomDownlinkAllocation(iteration, subframe);
+			randomRBAllocation(iteration, subframe);
 		} else {
-			LOG.info("Scheduling UEs using standard SFR appraoch");
-			super.doDownlinkAllocation(iteration, subframe);
+			LOG.info("Scheduling UEs using standard SFR approach");
+			super.allocateRB(iteration, subframe);
 		}
 	}
 
-	protected void randomDownlinkAllocation(final int iteration, final int subframe) {
+	protected void randomRBAllocation(final int iteration, final int subframe) {
 		PsRandom generalRandom = (PsRandom) config.getProperty(FieldNames.RANDOM_GENERAL);
 		boolean isDL = isDownlinkSubframe(subframe);
 		List<UE> toSchedule = getUEsToSchedule(isDL);

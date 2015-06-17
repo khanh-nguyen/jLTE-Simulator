@@ -46,13 +46,14 @@ public abstract class AbstractSector {
     private final SimpleCounter ulDatarateCounter;
     private final SimpleCounter dlDatarateCounter;
     private final SimpleCounter loadCounter;
-    private int numDlSubframes;
+    private int numDLSubframes;     // numULSubframes = 10 - numDLSubframes
 
     public final List<UE> servedUEs;
 
     protected final ResourceBlocks resourceBlocks;
 
-    public AbstractSector(Configuration config, int sectorId, ENodeB eNodeB, final Location loc, double txPower, double azimuth, double height, double downtilt, double antennaGain) {
+    public AbstractSector(Configuration config, int sectorId, ENodeB eNodeB, final Location loc, double txPower,
+                          double azimuth, double height, double downtilt, double antennaGain) {
 
         this.config = config;
         this.id = sectorId;
@@ -94,7 +95,7 @@ public abstract class AbstractSector {
     /**
      * Assign an RB each UE as far as possible.
      */
-    public void assignDownlinkRBs(final int iteration, final int subframe) {
+    public void assignRBs(final int iteration, final int subframe) {
         List<UE> ues = servedUEs;
         if (ues.isEmpty()) {
             updateScheduledRBCounters(0);
@@ -102,7 +103,7 @@ public abstract class AbstractSector {
         }
         // use frame configuration to decides if this iteration is for DL or UL
         // i.e. isDL = true or isDL = false
-        doDownlinkAllocation(iteration, subframe);
+        allocateRB(iteration, subframe);
     }
 
     protected List<UE> getUEsToSchedule(boolean isDL) {
@@ -127,7 +128,7 @@ public abstract class AbstractSector {
         return resourceBlocks.getResourceBlocks();
     }
 
-    protected abstract void doDownlinkAllocation(final int iteration, final int subframe);
+    protected abstract void allocateRB(final int iteration, final int subframe);
 
     public void updateScheduledRBCounters(final int numRBsScheduled) {
         numRBsScheduledCounter.accumulate(numRBsScheduled);
@@ -136,10 +137,14 @@ public abstract class AbstractSector {
 
     protected static void allocateRBToUE(UE ue, ResourceBlock RB, boolean isDL) {
         ue.schedule(RB, isDL);
-        // TODO: we have to check if the RB is actually scheduled to the UE
+        // NOTE: do we have to check if the RB is actually scheduled to the UE
+        // No, we don't. We only pass to this method UEs that are returned by getUEsToSchedule(isDL)
         RB.schedule();
     }
 
+    // FIXME: if UE transmits UL, UE's DLdatarate must be updated with 0.0
+    // on the other hand, if UE receives DL, its ULdaterate must be udpated with 0.0
+    // otherwise, the statistics will be inaccurate.
     public void accumulateDatarate() {
         double ulDatarate = 0.0, dlDatarate = 0.0;
         for (UE ue : servedUEs) {
@@ -226,12 +231,12 @@ public abstract class AbstractSector {
     // @arg dlSubframes int number of subframes used for downlink ( 0 <= dlSubframes < FRAME_LENGTH)
     public void setFrameConfiguration(int dlSubframes) {
         // TODO: check if dlSubframes is valid
-        this.numDlSubframes = dlSubframes;
+        this.numDLSubframes = dlSubframes;
     }
 
     // check if this subframe can be scheduled for downlink
     public boolean isDownlinkSubframe(int subframe) {
         // TODO: check if subframe is valid
-        return subframe < this.numDlSubframes;
+        return subframe < this.numDLSubframes;
     }
 }

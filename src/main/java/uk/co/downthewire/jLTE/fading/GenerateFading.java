@@ -40,8 +40,7 @@ public final class GenerateFading {
 	public static void main(String[] args) throws IOException, ConfigurationException {
 		Configuration configuration = new PropertiesConfiguration("system.properties").interpolatedConfiguration();
 
-		//String fadingDirectory = configuration.getString(FieldNames.FADING_PATH);
-        String fadingDirectory = BuildPath.getFadingPath(configuration);
+		String fadingDirectory = BuildPath.getFadingPath(configuration);
 
 		int numUEs = configuration.getInt(FieldNames.NUM_UES);
 		int numSectors = 57;

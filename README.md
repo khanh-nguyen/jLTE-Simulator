@@ -62,6 +62,83 @@ contains a config file for the UEs and a config file for the eNodeBs.
 A number of settings are also defined in the `system.properties`
 configuration file. 
 
+## Change log
+* *ResourceBlock.java* : 
+** separate data rate, sinr, avargae sinr by UL and DL. 
+** Create Comparator: `RB_UL_SINR_COMPARATOR` and `RB_DL_SINR_COMPARATOR` // FIXME: do we really need these?
+** Keep Comparator: `RB_SINR_COMPARATOR`
+
+* *AbstractSector.java* : 
+** separate DatarateCounter, 
+** rename `assignDownlinkRBs` to `assignRBs`, 
+** rename `doDownlinkAllocation` to `allocateRB` 
+** change `getUEsToSchedule()` to `getUEsToSchedule(boolean isDL)`
+** change `allocateRBToUE(UE ue, ResourceBlock RB)` to `allocateRBToUE(UE ue, ResourceBlock RB, boolean isDL)` 
+** `accumulateDatarate()` updates both `ulDatarateCounter` and `dlDatarateCounter`  // Does this make the statistics inaccurate? Answer: this should work as we update datarate for UE in both UL and DL in each iteration.
+** add `getAvgUplinkTput()`
+** change `getPercentileTput` to `getPercentileULTput()` and `getPercentileDLTput`
+** add `setFrameConfiguration(int dlSubframes)` used for UL/DL scheduling
+** add `isDownlinkSubframe(int subframe)` to check if the current `subframe` is scheduled for UL or DL. 
+** NOTE: in `generateX2Requests(int iteration)`, we use `ResourceBlock.RB_SINR_COMPARATOR`. Is it correct?
+
+* *AdaptiveSFRSector* 
+** `determineEdgeUEs()` uses `ue.getAverageSinr(true) + ue.getAverageSinr(false)` 
+** change `randomDownlinkAllocation(final int iteration)` to `randomRBAllocation(final int iteration, final int subframe)`
+
+* *DistributedSFRSector*
+** `priorDatarate = getPercentileULTput() + getPercentileDLTput()`
+
+* *MaxCISector*
+** change `allocateRB(final int iteration)` to `allocateRB(final int iteration, final int subframe)`.
+
+* *ProportionateFairSector*
+** change `allocateRB(final int iteration)` to `allocateRB(final int iteration, final int subframe)`. 
+
+* *RandomSector*
+** change `allocateRB(final int iteration)` to `allocateRB(final int iteration, final int subframe)`. 
+
+* *SFRSector*
+** change `allocateRB(final int iteration)` to `allocateRB(final int iteration, final int subframe)`.
+** change `getPriorityComparator(final ResourceBlock RB)` to `getPriorityComparator(final ResourceBlock RB, final boolean isDL)`.
+** change `calculatePriority(UE ue, ResourceBlock rb)` to `calculatePriority(UE ue, ResourceBlock rb, boolean isDL)`.
+
+* *SerFRSector* (extends from `SFRSector`)
+** change `allocateRB(final int iteration)` to `allocateRB(final int iteration, final int subframe)`.
+** change `calculatePriority(UE ue, ResourceBlock rb)` to `calculatePriority(UE ue, ResourceBlock rb, boolean isDL)`.
+
+* *TrafficGenerator*
+** change `public double getDownlinkProb(TrafficType trafficType)` to `private double getTrafficProb(TrafficType trafficType)`.
+
+* *UE*
+** change `scheduledRBs` to `scheduledULRBs` and `scheduledDLRBs`.
+** change `currentRBsQueued` to `currentULRBsQueued` and `currentDLRBsQueued`.
+** change `totalDatarates` to `totalULDatarates` and `totalDLDatarates`.
+** change `totalSinr` to `totalULSinr` and `totalDLSinr`.
+** change `totalRBsServed` to `ulRBsServed` and `dlRBsServed`.
+** change `totalRBsQueued` to `ulRBsQueued` and `dlRBsQueued`.
+** change `signalPerRB` to `signalPerULRB` and `signalPerDLRB`.
+** add `txPower`, used for calculating uplink power.
+** update `resetScheduledStatus()` to clear `scheduledULRBs` and `scheduledDLRBs`.
+** update `generateTraffic(double random)`: the `numRBs` us generated as normal, but it's added to UL or DL queued based on the `TRAFFIC_UPLINK_PROB`.
+** change `schedule(ResourceBlock RB)` to `schedule(ResourceBlock RB, boolean isDL)` to update the appropriate current queue, reserved RBs and scheduled RBs.
+** update `calculateSignalAcrossAllRBs()` to calculate uplink and downlink signal for each RB.
+** change `getSignalOnRB(int RB)` to `getSignalOnRB(int RB, boolean isDL)` to get last sample of UL/DL signal.
+** change `getRelativeSignalOnRB(int RB)` to `getRelativeSignalOnRB(int RB, boolean isDL)` to get relative UL/DL signal.
+** change `getAverageSinr()` to `getAverageSinr(boolean isDL)` to separate average SINR by UL and DL.
+** change `accumulateDatarate()` to `accumulateDatarate(int subframe)` to separate UL and DL datarate. Note that `subframe` is used in calculating interference.
+** change `calculateSignal(ResourceBlock RB)` to `calculateSignal(ResourceBlock RB, boolean isDL)`.
+** change `calculateInterference(ResourceBlock RB)` to `calculateInterference(ResourceBlock RB, int subframe)`. !!!! FIXME !!!!
+
+* *UEComparator*
+** change `Comparator<UE> getRBSignalComparator(final int RB)` to `Comparator<UE> getRBSignalComparator(final int RB, final boolean isDL)`. This method is used to sort UE by their scheduled traffic (MaxCISector).
+** change `Comparator<UE> getRelativeSignalComparator(final int RB)` to `Comparator<UE> getRelativeSignalComparator(final int RB, final boolean isDL)`. This method is used in `ProportionateFairSector`.
+
+* *UESectorTuple* 
+** TODO: verify meaning of gamma, model for computing DL gain, UL gain, what's their meaning? 
+** add `getUplinkPower(RB)`
+** add `getPower(ResourceBlock RB, int subframe)`
+** add `uplinkGain` and `txPowerPerRBUL`
+
 
 ## License
 

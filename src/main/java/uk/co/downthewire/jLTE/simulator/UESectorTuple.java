@@ -130,6 +130,7 @@ public class UESectorTuple implements Comparable<UESectorTuple> {
         return downlinkGain;
     }
 
+    // since we assume DL gain and UL gain are the same, we can compare using either one of them
     @Override
     public int compareTo(final UESectorTuple other) {
         return Double.valueOf(downlinkGain).compareTo(other.downlinkGain);
@@ -153,7 +154,7 @@ public class UESectorTuple implements Comparable<UESectorTuple> {
 
     public double getUplinkPower(ResourceBlock RB) {
         if (!config.getBoolean(FieldNames.FADING)) {
-            LOG.trace("txPowerPerRB = {}", txPowerPerRB);
+            LOG.trace("txPowerPerRB = {}", txPowerPerRBUL);
             return txPowerPerRBUL;
         }
         float[] fading = fadingData.getFadingDataForTuple(id);
@@ -165,11 +166,7 @@ public class UESectorTuple implements Comparable<UESectorTuple> {
 
     public double getPower(ResourceBlock RB, int subframe) {
         boolean isDL = this.sector.isDownlinkSubframe(subframe);
-        if (isDL) {
-            return this.getDownlinkPower(RB);
-        } else {
-            return this.getUplinkPower(RB);
-        }
+        return isDL ? this.getDownlinkPower(RB) : this.getUplinkPower(RB);
     }
 
     @Override

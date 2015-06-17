@@ -24,25 +24,25 @@ public final class UEComparators {
         }
     };
 
-    public static Comparator<UE> getRBSignalComparator(final int RB) {
+    public static Comparator<UE> getRBSignalComparator(final int RB, final boolean isDL) {
         return new Comparator<UE>() {
             @Override
             public int compare(final UE u1, final UE u2) {
                 //return Double.valueOf(u1.getSignalOnRB(RB)).compareTo(u2.getSignalOnRB(RB));
-                final Double s1 = u1.getSignalOnRB(RB, true) + u1.getSignalOnRB(RB, false);
-                final Double s2 = u2.getSignalOnRB(RB, true) + u2.getSignalOnRB(RB, false);
+                final Double s1 = u1.getSignalOnRB(RB, isDL);
+                final Double s2 = u2.getSignalOnRB(RB, isDL);
                 return s1.compareTo(s2);
             }
         };
     }
 
-    public static Comparator<UE> getRelativeSignalComparator(final int RB) {
+    public static Comparator<UE> getRelativeSignalComparator(final int RB, final boolean isDL) {
         return new Comparator<UE>() {
             @Override
             public int compare(final UE u1, final UE u2) {
                 //return Double.valueOf(u1.getRelativeSignalOnRB(RB)).compareTo(u2.getRelativeSignalOnRB(RB));
-                final Double s1 = u1.getRelativeSignalOnRB(RB, true) + u1.getRelativeSignalOnRB(RB, false);
-                final Double s2 = u2.getRelativeSignalOnRB(RB, true) + u2.getRelativeSignalOnRB(RB, false);
+                final Double s1 = u1.getRelativeSignalOnRB(RB, isDL);
+                final Double s2 = u2.getRelativeSignalOnRB(RB, isDL);
                 return s1.compareTo(s2);
             }
         };

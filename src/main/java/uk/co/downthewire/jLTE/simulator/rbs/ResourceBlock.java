@@ -107,13 +107,33 @@ public class ResourceBlock {
         return dlSinr.getAverage();
     }
 
-    public static final Comparator<ResourceBlock> RB_SINR_COMPARATOR = new Comparator<ResourceBlock>() {
+    public static final Comparator<ResourceBlock> RB_UL_SINR_COMPARATOR = new Comparator<ResourceBlock>() {
         @Override
         public int compare(final ResourceBlock rb1, final ResourceBlock rb2) {
 //            double avgSinr1 = rb1.getAverageSinr();
 //            double avgSinr2 = rb2.getAverageSinr();
-            double avgSinr1 = rb1.getAverageULSinr() + rb1.getAverageDLSinr();
-            double avgSinr2 = rb2.getAverageULSinr() + rb2.getAverageDLSinr();
+            double avgSinr1 = rb1.getAverageULSinr();
+            double avgSinr2 = rb2.getAverageULSinr();
+
+            return Double.valueOf(avgSinr1).compareTo(avgSinr2);
+        }
+    };
+
+    public static final Comparator<ResourceBlock> RB_DL_SINR_COMPARATOR = new Comparator<ResourceBlock>() {
+        @Override
+        public int compare(final ResourceBlock rb1, final ResourceBlock rb2) {
+            double avgSinr1 = rb1.getAverageDLSinr();
+            double avgSinr2 = rb2.getAverageDLSinr();
+
+            return Double.valueOf(avgSinr1).compareTo(avgSinr2);
+        }
+    };
+
+    public static final Comparator<ResourceBlock> RB_SINR_COMPARATOR = new Comparator<ResourceBlock>() {
+        @Override
+        public int compare(final ResourceBlock rb1, final ResourceBlock rb2) {
+            double avgSinr1 = rb1.getAverageDLSinr() + rb1.getAverageULSinr();
+            double avgSinr2 = rb2.getAverageDLSinr() + rb2.getAverageULSinr();
 
             return Double.valueOf(avgSinr1).compareTo(avgSinr2);
         }

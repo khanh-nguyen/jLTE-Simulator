@@ -22,10 +22,12 @@ public class DistributedSFRSector extends AdaptiveSFRSector {
 
 	public static DistributedSFRSector fromXML(Configuration config, Node xml, ENodeB eNodeB, Location location) {
 		SectorParams params = new SectorParams(xml);
-		return new DistributedSFRSector(config, params.getSectorId(), eNodeB, location, params.getTxPower(), params.getAzimuth(), params.getHeight(), params.getDowntilt(), params.getAntennaGain());
+		return new DistributedSFRSector(config, params.getSectorId(), eNodeB, location, params.getTxPower(),
+				params.getAzimuth(), params.getHeight(), params.getDowntilt(), params.getAntennaGain());
 	}
 
-	private DistributedSFRSector(Configuration config, int sectorId, final ENodeB eNodeB, final Location loc, double txPower, double azimuth, double height, double downtilt, double antennaGain) {
+	private DistributedSFRSector(Configuration config, int sectorId, final ENodeB eNodeB, final Location loc,
+								 double txPower, double azimuth, double height, double downtilt, double antennaGain) {
 		super(config, sectorId, eNodeB, loc, txPower, azimuth, height, downtilt, antennaGain);
 	}
 
@@ -42,7 +44,7 @@ public class DistributedSFRSector extends AdaptiveSFRSector {
 	@SuppressWarnings({ "unused", "boxing" })
 	public void mutate(int iteration) {
 		//priorDatarate = getPercentileTput();
-		priorDatarate = getPercentileULTput() + getPercentileDLTput();
+			priorDatarate = getPercentileULTput() + getPercentileDLTput();
 
 		for (DistributedSFRSector sector: getNeighbouringSectors()) {
 			sector.notifyNeighbour();
@@ -88,11 +90,14 @@ public class DistributedSFRSector extends AdaptiveSFRSector {
 	@SuppressWarnings("boxing")
 	public void evaluateMutation(int numberHappyNeighbours) {
 
-		boolean acceptMutation = false;
+		boolean acceptMutation;
 		if (config.getBoolean(FieldNames.DISTRIBUTED_SFR_CONSENSUS)) {
-			double proportionOfHappyNeighbours = ((double) numberHappyNeighbours) / ((double) getNeighbouringSectors().size());
-			LOG.error("numberOfHappyNeighbours: {}, proportionOfHappyNeighbours = {}", numberHappyNeighbours, proportionOfHappyNeighbours);
-			acceptMutation = hasTputIncreasedDuringMutationWindow() && proportionOfHappyNeighbours > config.getDouble(FieldNames.DISTRIBUTED_SFR_CONSENSUS_PROPORTION);
+			double proportionOfHappyNeighbours = ((double) numberHappyNeighbours) /
+					((double) getNeighbouringSectors().size());
+			LOG.error("numberOfHappyNeighbours: {}, proportionOfHappyNeighbours = {}",
+					numberHappyNeighbours, proportionOfHappyNeighbours);
+			acceptMutation = hasTputIncreasedDuringMutationWindow()
+					&& proportionOfHappyNeighbours > config.getDouble(FieldNames.DISTRIBUTED_SFR_CONSENSUS_PROPORTION);
 		} else {
 			acceptMutation = hasTputIncreasedDuringMutationWindow();
 		}

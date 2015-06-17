@@ -31,7 +31,8 @@ public class TrafficGenerator {
 		this.configuration = configuration;
 	}
 
-	public double getDownlinkProb(TrafficType trafficType) {
+	//public double getDownlinkProb(TrafficType trafficType) {
+	private double getTrafficProb(TrafficType trafficType) {
 		if (trafficType == TrafficType.LIGHT) {
 			return configuration.getDouble(TRAFFIC_LIGHT_PROBABILITY);
 		} else if (trafficType == TrafficType.MIXED) {
@@ -98,7 +99,7 @@ public class TrafficGenerator {
 			return getRBsToSend(trafficType);
 		}
 		int numRBsToGenerate = 0;
-		if (random > 1 - getDownlinkProb(trafficType)) {
+		if (random > 1 - getTrafficProb(trafficType)) {
 			numRBsToGenerate = generalRandom.nextInteger(getRBsToSend(trafficType)) + 1;
 		}
 		return numRBsToGenerate;

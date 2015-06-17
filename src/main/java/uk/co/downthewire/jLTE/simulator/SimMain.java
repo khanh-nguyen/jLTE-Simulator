@@ -32,7 +32,7 @@ public class SimMain {
     private final FadingData fadingData;
     private final X2Router x2Router;
     private final int FRAME_LENGTH = 10;
-    private final int FRAME_CONFIG = 7;
+    private final int FRAME_CONFIG = 7;         // number of DL subframes
     public SimMain(Configuration config, List<UE> ues, List<AbstractSector> sectors, FadingData fadingData, X2Router x2Router) {
         this.config = config;
         this.sectors = sectors;
@@ -89,7 +89,7 @@ public class SimMain {
             }
 
             for (final AbstractSector s : sectors) {
-                s.assignDownlinkRBs(iteration, subframe);
+                s.assignRBs(iteration, subframe);
             }
 
             for (final UE ue : ues) {

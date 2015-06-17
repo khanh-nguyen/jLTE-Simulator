@@ -16,10 +16,12 @@ public class SerFRSector extends SFRSector {
 
 	public static SerFRSector fromXML(Configuration config, Node xml, ENodeB eNodeB, Location location) {
 		SectorParams params = new SectorParams(xml);
-		return new SerFRSector(config, params.getSectorId(), eNodeB, location, params.getTxPower(), params.getAzimuth(), params.getHeight(), params.getDowntilt(), params.getAntennaGain());
+		return new SerFRSector(config, params.getSectorId(), eNodeB, location, params.getTxPower(),
+				params.getAzimuth(), params.getHeight(), params.getDowntilt(), params.getAntennaGain());
 	}
 
-	private SerFRSector(Configuration config, int sectorId, final ENodeB eNodeB, final Location loc, double txPower, double azimuth, double height, double downtilt, double antennaGain) {
+	private SerFRSector(Configuration config, int sectorId, final ENodeB eNodeB, final Location loc,
+						double txPower, double azimuth, double height, double downtilt, double antennaGain) {
 		super(config, sectorId, eNodeB, loc, txPower, azimuth, height, downtilt, antennaGain);
 	}
 
@@ -28,7 +30,7 @@ public class SerFRSector extends SFRSector {
 	 * Here we schedule the UE which has been scheduled least first until we've run out of UEs or RBs.
 	 */
 	@Override
-	protected void doDownlinkAllocation(final int iteration, final int subframe) {
+	protected void allocateRB(final int iteration, final int subframe) {
 		int scheduledRBs = 0;
 		boolean isDL = isDownlinkSubframe(subframe);
 
@@ -41,7 +43,7 @@ public class SerFRSector extends SFRSector {
 				break;
 			}
 			// Sort by signal quality
-			Collections.sort(toSchedule, getPriorityComparator(RB));
+			Collections.sort(toSchedule, getPriorityComparator(RB, isDL));
 			// Schedule the UE with the best signal
 			final UE ue = toSchedule.get(toSchedule.size() - 1);
 
@@ -54,9 +56,9 @@ public class SerFRSector extends SFRSector {
 	}
 
 	@Override
-	protected double calculatePriority(UE ue, ResourceBlock rb) {
+	protected double calculatePriority(UE ue, ResourceBlock rb, boolean isDL) {
 		//double basePriority = ue.getRelativeSignalOnRB(rb.id);
-		double basePriority = ue.getRelativeSignalOnRB(rb.id, true) + ue.getRelativeSignalOnRB(rb.id, true);
+		double basePriority = ue.getRelativeSignalOnRB(rb.id, isDL);
 		return basePriority * getGamma(ue, rb, config);
 	}
 

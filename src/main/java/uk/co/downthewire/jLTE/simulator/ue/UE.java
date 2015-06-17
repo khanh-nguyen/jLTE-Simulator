@@ -75,6 +75,8 @@ public class UE {
 
     private boolean isEdge;
 
+    //private PsRandom ulTrafficRandom;
+
     /**
      * Create a UE at a random location.
      */
@@ -123,6 +125,8 @@ public class UE {
         this.trafficType = trafficGenerator.getTrafficType(generalRandom.nextDouble());
 
         this.isEdge = false;
+
+        //this.ulTrafficRandom = new PsRandom();
     }
 
     public void resetScheduledStatus() {
@@ -137,6 +141,7 @@ public class UE {
     public void generateTraffic(double random) {
         int numRbs = trafficGenerator.generateTraffic(trafficType, random);
         // decide if demand traffic is UL or DL
+        //double ulProb = ulTrafficRandom.nextDouble();
         if (random <= config.getDouble(FieldNames.TRAFFIC_UPLINK_PROB)) {
             // accumulate UL queue
             ulRBsQueued.accumulate(numRbs);
@@ -173,6 +178,8 @@ public class UE {
         for (ResourceBlock RB : servingTuple.sector.getResourceBlocks()) {
             double ulSignal = calculateSignal(RB, false);
             double dlSignal = calculateSignal(RB, true);
+            // NOTE: the return values are only used for loggin purpose.
+            // NOTE: removed signalPerRB[RB.id].accumulate(signal) because it's already done in calculateSignal().
             LOG.trace("calculateSignalAcrossAllRBs - UL: UE[{}], RB[{}], signal={}", id, RB.id, ulSignal);
             LOG.trace("calculateSignalAcrossAllRBs - DL: UE[{}], RB[{}], signal={}", id, RB.id, dlSignal);
         }
@@ -238,25 +245,28 @@ public class UE {
     }
 
     private double calculateSignal(ResourceBlock RB, boolean isDL) {
-        if (isDL) {
-            double downlinkPower = servingTuple.getDownlinkPower(RB);
-            double scheduledPowerFactor = servingTuple.sector.getScheduledPowerFactor(RB);
-            double rxSignal = downlinkPower * scheduledPowerFactor;
-            signalPerDLRB[RB.id].accumulate(rxSignal);
-            return rxSignal;
-        }
-        double uplinkPower = servingTuple.getUplinkPower(RB);
+        double txPower = isDL ? servingTuple.getDownlinkPower(RB) : servingTuple.getUplinkPower(RB);
         double scheduledPowerFactor = servingTuple.sector.getScheduledPowerFactor(RB);
-        double rxSignal = uplinkPower * scheduledPowerFactor;
-        signalPerULRB[RB.id].accumulate(rxSignal);
+        double rxSignal = txPower * scheduledPowerFactor;
+        if (isDL) {
+            signalPerDLRB[RB.id].accumulate(rxSignal);  // FIXME: should we do signalPerULRB[RB.id].accumulate(0.0) ?
+        } else {
+            signalPerULRB[RB.id].accumulate(rxSignal);
+        }
         return rxSignal;
     }
 
+    // Logic: interference occurs if there is any tuple schedule transmission on the same RB.
+    // 1. iterate through all tuples
+    // 2. if the tuple has the same sector, continue.
+    //    FIXME can more than 1 UE is scheduled to use the same RB for UL with the same sector?
+    // 3. otherwise, if the tuple schedule to use the same RB, calculate interference.
     private double calculateInterference(ResourceBlock RB, int subframe) {
         double totalLinearInterference = 0.0;
         for (final UESectorTuple tuple : sectorTuples) {
             if (tuple.sector.id == servingTuple.sector.id &&
                 tuple.sector.servingENodeBId == servingTuple.sector.servingENodeBId) {
+                // TODO: check if there is any other UE in the same sector that is scheduled the same RB
                 continue;
             }
             if (tuple.sector.isRBScheduled(RB)) {
@@ -314,6 +324,7 @@ public class UE {
         return isDL ? (int) dlRBsQueued.getCount() : (int) ulRBsQueued.getCount();
     }
 
+// FIXME: fix this
 //    public int getCurrentRBsQueued() {
 //        return currentRBsQueued;
 //    }
